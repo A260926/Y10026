@@ -1,0 +1,37 @@
+processors:
+  active: false
+
+console-reports:
+  active: true
+  exclude:
+    - 'ComplexityReport'
+    # - 'IssuesReport'
+    - 'FileBasedIssuesReport'
+    - 'LiteIssuesReport'
+    - 'NotificationReport'
+    - 'ProjectStatisticsReport'
+
+complexity:
+  active: true
+  CyclomaticComplexMethod:
+    active: true
+  CognitiveComplexMethod:
+    active: true
+  LongMethod:
+    active: true
+    excludes: ['**/test/**', '**/androidTest/**']
+  LongParameterList:
+    active: true
+    ignoreDefaultParameters: true
+  TooManyFunctions:
+    active: true
+    ignoreOverridden: true
+
+style:
+  ReturnCount:
+    active: true
+    max: 5
+    excludedFunctions:
+      - "equals"
+    excludeLabeled: false
+    excludeReturnFromLambda: true

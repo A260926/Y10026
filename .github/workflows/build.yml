@@ -1,0 +1,106 @@
+name: build
+permissions:
+  contents: read
+  pull-requests: write
+
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - 'mkdocs.yml'
+    branches: [ master ]
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - 'mkdocs.yml'
+    branches:
+      - 'master'
+      - 'release/**'
+env:
+  GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx8g -Dorg.gradle.daemon=false -Dkotlin.incremental=false"
+
+jobs:
+  set-milestone:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set milestone
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        with:
+          script: |
+            const milestoneName = "Next"; // replace with your milestone
+            const milestones = await github.rest.issues.listMilestones({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open"
+            });
+            const milestone = milestones.data.find(m => m.title === milestoneName);
+            if (milestone) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                milestone: milestone.number
+              });
+            }
+  lint_check:
+    name: Lint check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - name: Set up JDK
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          distribution: temurin
+          java-version-file: .java-version
+      - uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6
+      - name: API check
+        run: ./gradlew ktLintCheck
+      - name: 'Notify on failure'
+        if: failure()
+        run: echo "Format check failed. Run ./gradlew ktLintFormat to fix."
+  api_check:
+    name: API check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - name: Set up JDK
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          distribution: temurin
+          java-version-file: .java-version
+      - uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6
+      - name: API check
+        run: ./gradlew apiCheck
+      - name: 'Notify on failure'
+        if: failure()
+        run: echo "Format check failed. Run ./gradlew apiDump to fix."
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - name: Set up JDK
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          distribution: 'temurin'
+          java-version-file: .java-version
+      - uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6
+      - name: Build and test with Gradle
+        run: ./gradlew build publishToMavenLocal
+  build-apple:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - name: Set up JDK
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          distribution: 'temurin'
+          java-version-file: .java-version
+      - uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6
+      - name: Build and test Apple targets
+        run: ./gradlew appleTest publishAppleToMavenLocal

@@ -1,0 +1,26 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["config:best-practices"],
+  schedule: ["every weekend"],
+  recreateWhen: "never",
+  enabledManagers: [
+    "gradle",
+    "gradle-wrapper",
+    "github-actions",
+  ],
+  labels: ["dependencies"],
+  packageRules: [
+    {
+      matchPackageNames: ["io.ktor:ktor-*"],
+      allowedVersions: "!/.*-eap-.*$/",
+    },
+    {
+      matchDatasources: ["maven"],
+      registryUrls: [
+        "https://repo.maven.apache.org/maven2/",
+        "https://dl.google.com/dl/android/maven2/",
+        "https://plugins.gradle.org/m2",
+      ],
+    },
+  ],
+}

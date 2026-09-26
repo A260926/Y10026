@@ -1,0 +1,73 @@
+[versions]
+agp = "9.2.1"
+autoService = "1.1.1"
+binaryCompatibilityValidator = "0.18.1"
+coroutines = "1.8.1"
+detekt = "2.0.0-alpha.3"
+junit = "4.13.2"
+kctfork = "0.13.0"
+kotlin = "2.4.0"
+kotlinx = "1.10.2"
+kotlinPoet = "2.3.0"
+kspVersion = "2.3.9"
+
+# these are the release versions for the artifacts, not for libraries in the catalog
+ktorfit = "2.7.5"
+ktorfitCompiler = "2.3.5"
+
+ktorfitGradlePlugin = "2.7.2"
+
+ktorVersion = "3.5.0"
+mockk = "1.14.11"
+mockito-kotlin = "4.1.0"
+vannikMavenPublish = "0.36.0"
+licensee = "1.14.1"
+ktlint = "14.2.0"
+gradlePluginPublish = "2.1.1"
+
+[libraries]
+android-build-gradle = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+autoService = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoService" }
+autoServiceKsp = "dev.zacsweers.autoservice:auto-service-ksp:1.2.0"
+detekt-gradle-plugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
+gradle-maven-publish-plugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "vannikMavenPublish" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+ktorfit-gradle-plugin = { module = "de.jensklingenberg.ktorfit:ktorfit-gradle-plugin", version.ref = "ktorfitGradlePlugin" }
+junit = { module = "junit:junit", version.ref = "junit" }
+kctfork-core = { module = "dev.zacsweers.kctfork:core", version.ref = "kctfork" }
+kctfork-ksp = { module = "dev.zacsweers.kctfork:ksp", version.ref = "kctfork" }
+kotlin-compiler-embeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
+kotlinPoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinPoet" }
+kotlinPoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinPoet" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kspApi = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "kspVersion" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx" }
+licensee-gradle-plugin = { module = "app.cash.licensee:licensee-gradle-plugin", version.ref = "licensee" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+
+#Ktor
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktorVersion" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorVersion" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorVersion" }
+ktor-client-curl = { module = "io.ktor:ktor-client-curl", version.ref = "ktorVersion" }
+ktor-client-ios = { module = "io.ktor:ktor-client-ios", version.ref = "ktorVersion" }
+ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktorVersion" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktorVersion" }
+ktor-client-json-js = { module = "io.ktor:ktor-client-json-js", version.ref = "ktorVersion" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktorVersion" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktorVersion" }
+ktor-client-serialization = { module = "io.ktor:ktor-client-serialization", version.ref = "ktorVersion" }
+ktor-serialization-gson = { module = "io.ktor:ktor-serialization-gson", version.ref = "ktorVersion" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorVersion" }
+
+[plugins]
+binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binaryCompatibilityValidator" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }
+kspPlugin = { id = "com.google.devtools.ksp", version.ref = "kspVersion" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "vannikMavenPublish" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
+gradlePluginPublish = { id = "com.gradle.plugin-publish", version.ref = "gradlePluginPublish" }
+ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfitGradlePlugin" }
+licensee = { id = "app.cash.licensee", version.ref = "licensee" }

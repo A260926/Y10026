@@ -1,0 +1,111 @@
+plugins {
+    kotlin("multiplatform")
+    alias(libs.plugins.kspPlugin)
+    id("ktorfit.jvm")
+    id("ktorfit.licensee")
+    id("kotlinx-serialization")
+    alias(libs.plugins.licensee)
+    id("de.jensklingenberg.ktorfit")
+}
+version = "1.0-SNAPSHOT"
+
+ksp {
+    arg("Ktorfit_Errors", "1")
+    arg("Ktorfit_QualifiedTypeName", "false")
+}
+
+kotlin {
+    jvm()
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+    js(IR) {
+        this.nodejs()
+        binaries.executable() // not applicable to BOTH, see details below
+    }
+    linuxX64 {
+        binaries {
+            executable()
+        }
+    }
+    linuxArm64 {
+        binaries {
+            executable()
+        }
+    }
+
+    mingwX64()
+    applyDefaultHierarchyTemplate()
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation(projects.ktorfitLibCore)
+                implementation(projects.ktorfitConverters.flow)
+                implementation(projects.ktorfitConverters.call)
+                implementation(projects.ktorfitConverters.response)
+                implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.ktor.client.serialization)
+                implementation(libs.ktor.client.content.negotiation)
+                implementation(libs.ktor.serialization.kotlinx.json)
+            }
+        }
+        commonTest {
+            dependencies {
+                implementation(libs.kotlin.test)
+                implementation(libs.kotlin.coroutines.test)
+                implementation(libs.ktor.client.mock)
+            }
+        }
+        linuxX64Main {
+            dependencies {
+                implementation(libs.ktor.client.curl)
+                implementation(libs.ktor.client.cio)
+            }
+        }
+
+        jvmMain {
+            kotlin.srcDir("build/generated/ksp/jvm/jvmMain/")
+
+            dependencies {
+                implementation(libs.ktor.client.cio)
+                implementation(libs.ktor.client.logging)
+                implementation(libs.ktor.serialization.gson)
+            }
+        }
+
+        jvmTest {
+            dependencies {
+                implementation(libs.ktor.client.mock)
+                implementation(libs.junit)
+            }
+        }
+
+        jsMain {
+            dependencies {
+                implementation(libs.ktor.client.serialization)
+                implementation(libs.ktor.client.json.js)
+                implementation(libs.ktor.client.js)
+            }
+        }
+    }
+}
+
+configurations.all {
+    resolutionStrategy.dependencySubstitution {
+        substitute(module("de.jensklingenberg.ktorfit:ksp"))
+            .using(project(":ktorfit-ksp"))
+            .because("we work with the unreleased development version")
+        substitute(module("de.jensklingenberg.ktorfit:gradle-plugin"))
+            .using(project(":ktorfit-gradle-plugin"))
+            .because("we work with the unreleased development version")
+        substitute(module("de.jensklingenberg.ktorfit:compiler-plugin"))
+            .using(project(":ktorfit-compiler-plugin"))
+            .because("we work with the unreleased development version")
+        substitute(module("de.jensklingenberg.ktorfit:converters-flow"))
+            .using(project(":ktorfit-converters:flow"))
+            .because("we work with the unreleased development version")
+        substitute(module("de.jensklingenberg.ktorfit:converters-call"))
+            .using(project(":ktorfit-converters:call"))
+            .because("we work with the unreleased development version")
+    }
+}
