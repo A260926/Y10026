@@ -60,7 +60,7 @@ private fun getQueryNameText(
             "%s?.filterNotNull()?.forEach { %s.appendAll(\"\$it\", emptyList()) }\n".format(
                 name,
                 if (encoded) {
-                    "parameters"
+                    "encodedParameters"
                 } else {
                     "parameters"
                 },

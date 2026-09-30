@@ -126,6 +126,104 @@ interface TestService {
     }
 
     @Test
+    fun whenEncodedQueryNameCollectionFoundUseEncodedParameters() {
+        val source =
+            SourceFile.kotlin(
+                "Source.kt",
+                """
+      package com.example.api
+import de.jensklingenberg.ktorfit.http.GET
+import de.jensklingenberg.ktorfit.http.QueryName
+
+interface EncodedQueryNameTestApi {
+    @GET("posts")
+    suspend fun encodedList(@QueryName(true) names: List<String?>?)
+
+    @GET("posts")
+    suspend fun notEncodedList(@QueryName(false) names: List<String?>?)
+
+    @GET("posts")
+    suspend fun encodedArray(@QueryName(encoded = true) names: Array<String?>?)
+
+    @GET("posts")
+    suspend fun encodedScalar(@QueryName(encoded = true) name: String)
+}
+    """,
+            )
+
+        val compilation = getCompilation(listOf(source))
+        compilation.compile()
+
+        val generatedSourcesDir = compilation.kspSourcesDir
+        val generatedFile =
+            File(
+                generatedSourcesDir,
+                "/kotlin/com/example/api/_EncodedQueryNameTestApiImpl.kt",
+            )
+
+        val actualSource = generatedFile.readText()
+
+        fun urlBlockOf(functionSignature: String): String {
+            val start = actualSource.indexOf(functionSignature)
+            assertTrue("generated function not found: $functionSignature", start >= 0)
+            val blockStart = actualSource.indexOf("url{", start)
+            val blockEnd = actualSource.indexOf("}", blockStart)
+            return actualSource.substring(blockStart, blockEnd)
+        }
+
+        // Nullable List + encoded=true: null collection must be skipped, non-null members
+        // must reach encodedParameters so '%' and '+' are not encoded a second time.
+        val encodedListBlock =
+            urlBlockOf("override suspend fun encodedList(names: List<String?>?)")
+        assertTrue(encodedListBlock, encodedListBlock.contains("names?.filterNotNull()"))
+        assertTrue(
+            encodedListBlock,
+            encodedListBlock.contains(
+                "encodedParameters.appendAll(\"\$it\", emptyList())",
+            ),
+        )
+        assertTrue(
+            encodedListBlock,
+            !encodedListBlock.contains("parameters.appendAll"),
+        )
+
+        // Nullable List + encoded=false stays on the regular parameters builder.
+        val notEncodedListBlock =
+            urlBlockOf("override suspend fun notEncodedList(names: List<String?>?)")
+        assertTrue(
+            notEncodedListBlock,
+            notEncodedListBlock.contains(
+                "parameters.appendAll(\"\$it\", emptyList())",
+            ),
+        )
+        assertTrue(
+            notEncodedListBlock,
+            !notEncodedListBlock.contains("encodedParameters"),
+        )
+
+        // Nullable Array shares the collection branch and must use encodedParameters too.
+        val encodedArrayBlock =
+            urlBlockOf("override suspend fun encodedArray(names: Array<String?>?)")
+        assertTrue(encodedArrayBlock, encodedArrayBlock.contains("names?.filterNotNull()"))
+        assertTrue(
+            encodedArrayBlock,
+            encodedArrayBlock.contains(
+                "encodedParameters.appendAll(\"\$it\", emptyList())",
+            ),
+        )
+
+        // The scalar encoded branch was already correct and must stay unchanged.
+        val encodedScalarBlock =
+            urlBlockOf("override suspend fun encodedScalar(name: String)")
+        assertTrue(
+            encodedScalarBlock,
+            encodedScalarBlock.contains(
+                "encodedParameters.appendAll(\"\$name\", emptyList())",
+            ),
+        )
+    }
+
+    @Test
     fun whenNotEncodedQueryMapAnnotationAndEncodedFound() {
         val source =
             SourceFile.kotlin(
